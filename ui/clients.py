@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-import sqlite3
+from database.database.connection import get_connection
 
 
 class ClientManager(ttk.Frame):
@@ -66,16 +66,15 @@ class ClientManager(ttk.Frame):
         del_btn.pack(pady=5)
 
     def load_clients(self):
-        for row in self.tree.get_children():
-            self.tree.delete(row)
-
-        conn = sqlite3.connect('travel_agency.db')
+        conn = get_connection()
         cursor = conn.cursor()
         cursor.execute('''
             SELECT id, full_name, passport, phone, email, preferences, visa_required, vaccination_required FROM clients
         ''')
         rows = cursor.fetchall()
         conn.close()
+
+        self.tree.delete(*self.tree.get_children())  # Очищаем перед загрузкой
 
         for r in rows:
             visa = "Да" if r[6] else "Нет"
@@ -95,7 +94,7 @@ class ClientManager(ttk.Frame):
             messagebox.showwarning("Ошибка", "Введите ФИО клиента")
             return
 
-        conn = sqlite3.connect('travel_agency.db')
+        conn = get_connection()  # <-- исправлено
         cursor = conn.cursor()
         cursor.execute('''
             INSERT INTO clients (full_name, passport, phone, email, preferences, visa_required, vaccination_required)
@@ -119,7 +118,7 @@ class ClientManager(ttk.Frame):
         if not confirm:
             return
 
-        conn = sqlite3.connect('travel_agency.db')
+        conn = get_connection()
         cursor = conn.cursor()
         cursor.execute("DELETE FROM clients WHERE id = ?", (client_id,))
         conn.commit()

@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-import sqlite3
+from database.database.connection import get_connection  # импортируем get_connection
 
 class TourSearch(ttk.Frame):
     def __init__(self, parent):
@@ -65,7 +65,7 @@ class TourSearch(ttk.Frame):
             except ValueError:
                 pass  # Игнорируем неправильный ввод цены
 
-        conn = sqlite3.connect('travel_agency.db')
+        conn = get_connection()  # используем get_connection()
         cursor = conn.cursor()
         cursor.execute(query, params)
         results = cursor.fetchall()
